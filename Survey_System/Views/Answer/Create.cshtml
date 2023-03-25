@@ -1,0 +1,105 @@
+﻿@model IEnumerable<Survey_System.Models.Question>
+@{
+
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    int number = 1;
+    int gomines = 0;
+}
+
+
+<div class="card">
+    <div class="card-body">
+        <div class="card-title text-center" ">Anket Cevaplama Sayfası</div>
+        <hr>
+        @using (Html.BeginForm("Create", "Answer"))
+        {
+            <form action="#">
+                <div class="form-group">
+                    @Html.DropDownList("Code", (SelectList)ViewBag.Person, "Lütfen kişi seçiniz", new { @class = "form-control" })
+                </div>
+
+                @foreach (var item in Model)
+                {
+                    <input name="@item.QuestionAsked" id="Question_@item.Id" value="@item.QuestionAsked" type="hidden" />
+                    <span style="font-weight:bold">@number)</span>
+                    @item.QuestionAsked
+                    <br /><br />
+
+                    <div class="icheck-material-primary icheck-inline">
+                        <input type="radio" id="Id_@item.Id" name="Answer_@item.Id" class="radio_@item.Id" value="@Survey_System.Constants.AnswerType.Yes">
+                        <label for="Id_@item.Id">@Survey_System.Constants.AnswerType.Yes</label>
+
+                        <input type="radio" id="Id_@gomines" name="Answer_@item.Id" class="radio_@item.Id" value="@Survey_System.Constants.AnswerType.No">
+                        <label for="Id_@gomines">@Survey_System.Constants.AnswerType.No</label>
+                    </div>
+
+                    <script src="~/Content/assets/js/ajaxjquery.js"></script>
+                    <script>
+
+                    $('.radio_@item.Id').click(function () {
+                        var formdata = new FormData();
+                        var code = $('#Code').val();
+                        formdata.set("Code", code);
+                        var namesurname = $('#Code :selected').text();
+                        formdata.set("NameSurname", namesurname);
+                        var question = $('#Question_@item.Id').val();
+                        formdata.set("Question", question);
+                        var answer = $('input[name="Answer_@item.Id"]:checked').val();
+                        formdata.set("Answer", answer);
+                        if (code == '') {
+                            $('#warningMessage').modal('show');
+                            return;
+                        }
+                        $.ajax({
+                            url: "/Answer/SendData",
+                            data: formdata,
+                            type: "POST",
+                            cache: false,
+                            contentType: false,
+                            processData: false,
+                            successs: function (data) {
+                                if (data == "True") {
+                                }
+                            },
+                            error: function (data) {
+                                alert("Ekleme işlemi sırasında bir hata meydana geldi!");
+                            }
+                        });
+                        });
+
+                    </script>
+                    gomines--;
+                    number++;
+                }
+
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-round btn-success shadow-success px-5"><i class="icon-lock"></i> Kaydet</button>
+                </div>
+            </form>
+        }
+
+    </div>
+</div>
+
+
+<div class="modal fade" id="warningMessage">
+    <div class="modal-dialog">
+        <div class="modal-content border-warning">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title text-white"><i class="fa fa-star"></i> Uyarı </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p> Lütfen kişi seçiniz</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-inverse-primary" data-dismiss="modal"><i class="fa fa-times"></i> Kapat</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
